@@ -9,6 +9,8 @@ editor_options:
 ```{r}
 #| warning: false
 library(tidyverse)
+
+
 ```
 
 
@@ -50,6 +52,38 @@ One of the main metadata tables is 'stock':
 
 -   In your own words, describe the unit of observation in the 'stock' table and some associated variables that describe it.
 
+
+```{r}
+
+stock_table = stock
+
+#there are 1514 fish stocks 
+#view(stock_table)
+
+stock_table |> 
+  select(commonname) |>
+  unique() |> 
+  mutate(number = n())
+
+# seems like 410 common names are involved
+
+stock_table |> 
+  group_by(commonname) |> 
+  select(commonname) |> 
+  mutate(num_stock = n()) |> 
+  unique() |>
+  arrange(desc(num_stock))
+
+# seems like there are the most Pink, Sockeye, and Chum salmon stocks 
+
+```
+
+
+1514 fish stocks are included in the data, representing 410 species assuming each common name corresponds to one scientific name. Pink, Sockeye, and Chum salmon have the most stocks with 170, 104, and 99 respectively. 
+
+Each row in the stock table includes a identifier for the stock that includes some information about the country the stock resides in, the taxonomic serial number for which kind of fish is present, both the scientific and common names, an area id including the country the stock is in as well as the stock's position inside that country, a more detailed identifier of which country and region the stock belong to, a unique stock id, another area id, and a indicator of whether or not a stock is current / deprecated.  
+
+
 ### Q2 (1 point)
 
 The next main metadata table is 'assessment':
@@ -59,6 +93,17 @@ The next main metadata table is 'assessment':
 -   It seems like 'stockid' and 'assessyear' might uniquely identify each assessment. Is this the case? If not, why not?
 
 -   Which variable(s) might you use to join 'stock' and 'assessment'?
+
+
+```{r}
+
+assessment |> 
+
+
+```
+
+
+
 
 ### Q3 (1 point)
 
