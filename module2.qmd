@@ -97,12 +97,91 @@ The next main metadata table is 'assessment':
 
 ```{r}
 
-assessment |> 
+# entry 689 was invalid and making df unable to be read
+
+assessment[] = lapply(assessment, function(x) { 
+  if (is.character(x)) iconv(x, 
+                             from = "latin1",
+                             to = "UTF-8") else x })
+
+
+view(assessment)
+
+
 
 
 ```
 
 
+Each entry in "assessment" records several identifiers for a given stock, the location of the stock, date of recording / loading along with the year they happened, the method used to assess a given stock ( if any ), and a link to the excel sheet where the data are located. There are several other columns included, however the /documentation sheet does not indicate what they are and most of their values are either "null" or the same across most observations, so I have ignored them. 
+
+Let's check to see if stockid and assessyear are truly unique across all rows:
+
+```{r}
+
+# groups by stock id then counts. count should be 1 if stockid is unique
+
+unique_stockid = assessment |> group_by(stockid) |> mutate(num_unique_stockid = n()) |> filter(num_unique_stockid > 1) |> ungroup()
+
+view(unique_stockid)
+
+```
+
+Alright, so stockid is not truly unique -- there are 2652 observations out of 3497 that share the same id with at least one other observation.
+
+
+```{r}
+
+unique_assessyear = assessment |> group_by(assessyear) |> mutate(num_unique_assessyear = n()) |> filter(num_unique_assessyear > 1) |> ungroup()
+
+view(unique_assessyear)
+
+```
+
+Okay so assessyear ( as expected ) is not unique with 3061 of 3497 entries sharing the same year with at least one other observation.
+
+
+Let's see if stockid + assessyear together works:
+
+```{r}
+
+unique_stkid_asyear = assessment |> group_by(stockid, assessyear) |> mutate(num_unique = n()) |> filter(num_unique > 1)
+
+view(unique_stkid_asyear)
+
+```
+
+Again, both columns together are not unique since 96 out of the 3497 total entries share both stockid and assessyear with at least one other observation. 
+
+
+let's check which columns are shared between stock and assessment:
+
+```{r}
+
+intersect(colnames(stock_table), colnames(assessment))
+
+# stockid and stocklong are the only ones shared
+# lets see if they're unique for both dataframes:
+
+stock_table |> 
+  group_by(stockid, stocklong) |>
+  mutate(num_unique = n()) |> 
+  filter(num_unique > 1) |>
+  length()
+
+
+assessment |>
+  group_by(stockid, stocklong) |> 
+  mutate(num_unique = n()) |>
+  filter(num_unique > 1) |> 
+  length()
+
+
+# so grouping by both stockid and stocklong is not enough to get a unique key for each dataframe
+
+```
+
+The columns that are shared between stock and assessment ( stockid / stocklong ) are not unique when paired together in either table. The stock table has another identifier "GRSF_uuid" that seems to be unique or almost unique, so if it were possible to add this column to assessment, I think both dataframes could be joined without a problem. However, as they are currently, I don't think it is reasonable to join them. 
 
 
 ### Q3 (1 point)
