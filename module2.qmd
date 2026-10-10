@@ -261,9 +261,48 @@ assessmethod_df = assessmethod_df |>
 
 There are two main data tables described in section C, but their key attributes are difficult to understand. Join the two main data tables with their respective metrics tables (section D):
 
+
+```{r}
+
+# bioparams not opening for some reason; assuming same thing that happened with assessment
+
+bioparams[] = lapply(bioparams, function(x) { 
+  if (is.character(x)) iconv(x, 
+                             from = "latin1",
+                             to = "UTF-8") else x })
+
+
+#view(bioparams)
+#view(biometrics)
+
+#using biounique as the key for biometrics --> maps to bioid
+
+
+bio_params_metrics = bioparams |> 
+  left_join(biometrics, join_by(bioid == biounique))
+
+
+
+#view(timeseries)
+#view(tsmetrics)
+
+#using tsunique as key for tsmetrics --> maps to tsid
+
+ts_params_metrics = timeseries |> 
+  left_join(tsmetrics, join_by(tsid == tsunique))
+
+```
+
+
 -   Briefly describe the contents of each joined table.
 
 -   What is accomplished by joining these tables?
+
+Bioparams table contains IDs for stocks that include their common names and general locations. Each row contains a different biometric being recorded ( bioid ). By joining with biometrics, the table now includes longer descriptions and more detailed categories for the biometric codes used in the bioparams table and indicates what units they are being measured it.  
+
+Timeseries table contains different metrics for a given fish stock and location, each across several years, hence why the table is 1.6 million observations long. By joining with tsmetrics, the joined table now indicates the method used to calculate each metric, a longer description of the metric, and the units each metric is reported in. 
+
+
 
 
 ## Overexploitation of Atlantic cod
