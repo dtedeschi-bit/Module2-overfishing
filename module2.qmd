@@ -60,19 +60,19 @@ stock_table = stock
 #there are 1514 fish stocks 
 #view(stock_table)
 
-stock_table |> 
-  select(commonname) |>
-  unique() |> 
-  mutate(number = n())
+#stock_table |> 
+  #select(commonname) |>
+ # unique() |> 
+ # mutate(number = n())
 
 # seems like 410 common names are involved
 
-stock_table |> 
-  group_by(commonname) |> 
-  select(commonname) |> 
-  mutate(num_stock = n()) |> 
-  unique() |>
-  arrange(desc(num_stock))
+#stock_table |> 
+ # group_by(commonname) |> 
+ # select(commonname) |> 
+ # mutate(num_stock = n()) |> 
+ # unique() |>
+ # arrange(desc(num_stock))
 
 # seems like there are the most Pink, Sockeye, and Chum salmon stocks 
 
@@ -105,7 +105,7 @@ assessment[] = lapply(assessment, function(x) {
                              to = "UTF-8") else x })
 
 
-view(assessment)
+#view(assessment)
 
 
 
@@ -121,9 +121,13 @@ Let's check to see if stockid and assessyear are truly unique across all rows:
 
 # groups by stock id then counts. count should be 1 if stockid is unique
 
-unique_stockid = assessment |> group_by(stockid) |> mutate(num_unique_stockid = n()) |> filter(num_unique_stockid > 1) |> ungroup()
+unique_stockid = assessment |> 
+  group_by(stockid) |> 
+  mutate(num_unique_stockid = n()) |> 
+  filter(num_unique_stockid > 1) |> 
+  ungroup()
 
-view(unique_stockid)
+#view(unique_stockid)
 
 ```
 
@@ -132,9 +136,13 @@ Alright, so stockid is not truly unique -- there are 2652 observations out of 34
 
 ```{r}
 
-unique_assessyear = assessment |> group_by(assessyear) |> mutate(num_unique_assessyear = n()) |> filter(num_unique_assessyear > 1) |> ungroup()
+unique_assessyear = assessment |>
+  group_by(assessyear) |> 
+  mutate(num_unique_assessyear = n()) |> 
+  filter(num_unique_assessyear > 1) |>
+  ungroup()
 
-view(unique_assessyear)
+#view(unique_assessyear)
 
 ```
 
@@ -145,9 +153,12 @@ Let's see if stockid + assessyear together works:
 
 ```{r}
 
-unique_stkid_asyear = assessment |> group_by(stockid, assessyear) |> mutate(num_unique = n()) |> filter(num_unique > 1)
+unique_stkid_asyear = assessment |>
+  group_by(stockid, assessyear) |>
+  mutate(num_unique = n()) |> 
+  filter(num_unique > 1)
 
-view(unique_stkid_asyear)
+#view(unique_stkid_asyear)
 
 ```
 
@@ -163,18 +174,18 @@ intersect(colnames(stock_table), colnames(assessment))
 # stockid and stocklong are the only ones shared
 # lets see if they're unique for both dataframes:
 
-stock_table |> 
-  group_by(stockid, stocklong) |>
-  mutate(num_unique = n()) |> 
-  filter(num_unique > 1) |>
-  length()
+#stock_table |> 
+#  group_by(stockid, stocklong) |>
+#  mutate(num_unique = n()) |> 
+#  filter(num_unique > 1) |>
+  #length()
 
 
-assessment |>
-  group_by(stockid, stocklong) |> 
-  mutate(num_unique = n()) |>
-  filter(num_unique > 1) |> 
-  length()
+#assessment |>
+ # group_by(stockid, stocklong) |> 
+ #mutate(num_unique = n()) |>
+ # filter(num_unique > 1) |> 
+ # length()
 
 
 # so grouping by both stockid and stocklong is not enough to get a unique key for each dataframe
@@ -190,13 +201,61 @@ In section B of the Database Quick Guide, additional metadata tables are listed 
 
 | B table      | Associated table | join column from B | join column from other |
 |------------------|------------------|------------------|------------------|
-| area         |                  |                    |                        |
-| assessmethod |                  |                    |                        |
-| assessor     |                  |                    |                        |
-| management   |                  |                    |                        |
-| taxonomy     |                  |                    |                        |
+| area         |management  | areatype  | mgmt  |
+| assessmethod |assessment  | assessmethod |  method_short  |     
+| assessor     |management  | mgmt  | mgmt  |
+| management   |area, assessor| mgmt  | areatype, mgmt respectively |
+| taxonomy     |  stock | tsn | tsn |
 
 \*Note that assessmethod is not a data.frame, which was perhaps an oversight; consider turning it into one for the ease of using tidyverse functions.
+
+```{r}
+assessmethod_df = as_tibble(assessmethod)
+
+
+assessmethod_df = assessmethod_df |>
+  rename(category = 1,
+         abrev_method = 2, 
+         full_method_name = 3)
+
+
+
+#for loop for checking intersection that didn't work
+
+#list_of_b_tables = list(area,assessmethod_df,assessor,management,taxonomy)
+
+#vector = vector(mode = "list", length = 100)
+
+#x = 20
+
+#for (first_table in list_of_b_tables) {
+ # for (second_table in list_of_b_tables) {
+  #  c(paste("col names shared between", 
+   #   deparse(substitute(first_table)), 
+   #   "and", 
+     # deparse(substitute(second_table)),": ", 
+    #  intersect(colnames(first_table),
+       #       colnames(second_table))))
+    #
+    
+    
+   # }
+#}
+
+
+#view(area)
+#view(assessmethod_df)
+#view(assessor)
+#view(management)
+#view(taxonomy)
+
+
+
+
+
+```
+
+
 
 ### Q4 (1 point)
 
