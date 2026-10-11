@@ -402,7 +402,7 @@ atl_cod_ts_for_real |>
   theme_classic()+
   facet_wrap(~tscategory+region, 
              scales = "free_y")+
-  labs(color = "Location of Stock")
+  labs(color = "Location of Stock", x = "Year", y = "Fraction")
 
 
 
@@ -415,7 +415,7 @@ atl_cod_ts_for_real |>
 For Catch or Landings plots, for most stocks in all regions the highest CoL occured in the 1990s up to 2000, when there was a brief pause, and for some stocks more recently the CoL has shot up sharply and subsequently fallen back down slightly. At times when CoL is high, this means the number of fish being caught is greater than the average number of fish caught by the factor listed on the y-axis; this can be interpreted as a measure of expansion of the industry or higher fishing activity during a given time.
 
 For Fishing mortality, percentages started much lower in the 1950s and 60s, and more recently, though there is some fluctuation, the percentages are much higher than they were.
-This is a measure of the percent ( multiply y-axis by 10 ) of the fish population removed from a given stock in a given year. So although Catch or Landings was much higher 70 years ago, the high recent fishing mortality indicates modern fish populations are being stretched thinner now compared to previously.
+This is a measure of the percent ( multiply y-axis by 10 ) of the fish population removed from a given stock in a given year. So although Catch or Landings was much higher 70 years ago, the high recent fishing mortality indicates modern fish populations are being stretched thinner now compared to previously
 
 
 
@@ -425,12 +425,123 @@ We will recreate a slightly more complex version of a figure from the [Millenniu
 
 Selecting a metric that can be added across stocks, calculate the total fish landings for each region of Atlantic cod. Make a plot similar to Fig. 11 and color by region.
 
+```{r}
+
+#atl_cod_ts_for_real |> 
+#  filter(tscategory == "CATCH or LANDINGS") |> 
+ # group_by(tsid) |> 
+ # mutate(num_unique = n()) |> 
+ # select(num_unique, tsid) |> 
+ # unique() |>
+ # view()
+
+
+```
+
+There are the most entries for the metric "TCbest-MT" which corresponds to total catch in units of metric tons, so this is what I will focus on for this graph.
+
+
+"NA" entries are a real problem, so I will replace all of them with zero to facilitate calculation.
+
+```{r}
+
+atl_cod_ts_for_real$tsvalue = if_else(is.na(atl_cod_ts_for_real$tsvalue) == TRUE & 
+                                        atl_cod_ts_for_real$tsid == "TCbest-MT", 
+                                      true = 0, false = atl_cod_ts_for_real$tsvalue )
+
+
+atl_cod_ts_plus_extra = atl_cod_ts_for_real |> 
+  filter(tsid == "TCbest-MT",
+         tsyear >= 1950) |>
+  group_by(tsyear, region) |>
+  mutate(total_regional_catch = sum(tsvalue)) |>
+  select(total_regional_catch,
+         tsid, 
+         tsyear, 
+         tsvalue, 
+         region) 
+
+
+#atl_cod_ts_for_real|>filter(region == "US East Coast", tsid == "TCbest-MT") |> view()
+
+
+
+atl_cod_ts_plus_extra |>
+  ggplot(aes(x = tsyear, 
+             y = total_regional_catch,
+             color = region))+
+  geom_line()+
+  geom_point()+
+  theme_classic()+
+  labs(x = "Year of Measurement",
+       y = "Total Cod Catch Across All Regional Stocks ( Metric Tons )",
+       color = "Region")
+
+#US contribution is small relative to the others. Faceting around region will allow trends to be identified more easily
+
+atl_cod_ts_plus_extra |>
+  ggplot(aes(x = tsyear, 
+             y = total_regional_catch,
+             color = region))+
+  geom_line()+
+  geom_point()+
+  theme_classic()+
+  labs(x = "Year of Measurement",
+       y = "Total Cod Catch Across All Regional Stocks ( Metric Tons )",
+       color = "Region")+
+  facet_wrap(~region, scales = "free_y")
+
+```
+
+
 
 Which region does Fig. 11 from the MEA correspond to?
+
+
+The figure says it represents data from the fishery off the coast of Newfoundland ( Canadian East Coast )
+
 
 ### Q8 (1 point)
 
 Under the Management Policies section of the [book chapter](https://pressbooks.pub/extinctionstories/chapter/atlantic-cod/), the authors summarize a few major efforts to restore and protect stocks of Atlantic cod. Focusing only on the US and Canada, update your plot from above to include vertical lines to represent the timing of least three major events and label them clearly on your plot. Doing so will likely involve creating a separate dataframe and using it in one of your ggplot layers (one possible argument within `aes()` is `linetype`). Facet the plot by region and update until it is easily interpretable.
+
+
+1976, 1996, and 2006 all saw changes to fishery legislation in favor of Cod protection. Let's add these dates to our plot: 
+
+
+```{r}
+
+important_dates = c(1976,1996,2006)
+important_names = c("1976 MSFCMA", "1996 SFA", "2006 MSFCMRA")
+
+
+legislation_dates = data.frame(important_dates, important_names)
+
+
+atl_cod_ts_plus_extra |> 
+  filter(region == "US East Coast"|
+           region == "Canada East Coast") |>
+  ggplot(aes(x = tsyear, 
+             y = total_regional_catch,
+             color = region))+
+  geom_line()+
+  geom_point()+
+  geom_vline(data = legislation_dates, 
+             aes(xintercept = important_dates,
+                 linetype = important_names), 
+             linewidth = 1)+
+  theme_classic()+
+  labs(x = "Year of Measurement",
+       y = "Total Cod Catch Across All Regional Stocks ( Metric Tons )",
+       color = "Region", 
+       linetype = "Major Legislation Dates")+
+  facet_wrap(~region, scales = "free_y")
+
+
+
+```
+
+
 
 ### Q9 (2 points)
 
