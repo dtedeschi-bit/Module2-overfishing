@@ -315,10 +315,45 @@ The collapse of the Atlantic cod fisheries is well documented. Let's see if we c
 
 -   How many unique fish stocks comprise "Atlantic cod" and what regions do they come from?
 
+```{r}
+
+atl_cod_stock = stock |> filter(commonname == "Atlantic cod") |> group_by(stockid) |> unique()
+
+```
+
+There are 28 unique atlantic cod stocks originating in the North American ( Canada, New England, Greenland ) and Northern European ( Iceland, UK, Denmark, Poland, France ) waters of the Northern Atlantic Ocean and North Sea.  
+
 
 Create a vector of the 'stockid' associated with "Atlantic cod". Then turn your attention to the previously-joined timeseries/tsmetrics table and create a subsetted dataframe with only observations of "Atlantic cod" that have a non-NA value. This table reports many years and many metrics, while we are primarily interested in the years since 1950.
 
+```{r}
+
+
+stockid_vector = atl_cod_stock |> select(stockid) 
+
+atl_cod_ts_data = ts_params_metrics |> 
+  semi_join(stockid_vector, join_by(stockid))
+
+
+most_common_ts_stuff = atl_cod_ts_data |> 
+  group_by(tscategory) |> 
+  mutate(ts_category_most_common = n()) |> 
+  select(tscategory, ts_category_most_common) |>
+  unique()
+
+
+
+```
+
+
+
 -   Which 2 metrics are most commonly reported for Atlantic cod in this timeframe and what do they mean?
+
+Fishing Mortality and Catch or Landing are the most common metrics. 
+
+Fishing mortality refers to the rate at which fish are removed from a stock by fishing.
+
+Catch refers to the total mass of fish caught on a given trip; landings refers to the percent of the total catch that is brought back with the boat to land. 
 
 
 ### Q6 (1 point)
