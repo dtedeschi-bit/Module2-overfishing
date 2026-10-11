@@ -16,11 +16,11 @@ library(tidyverse)
 
 ### Use of GitHub
 
-Link to your forked GH repository:
+Link to your forked GH repository: https://github.com/dtedeschi-bit/Module2-overfishing
 
 ### Use of Quarto
 
-Link to your .qmd file:
+Link to your .qmd file: 
 
 ## Overexploitation of global fisheries
 
@@ -317,7 +317,10 @@ The collapse of the Atlantic cod fisheries is well documented. Let's see if we c
 
 ```{r}
 
-atl_cod_stock = stock |> filter(commonname == "Atlantic cod") |> group_by(stockid) |> unique()
+atl_cod_stock = stock |>
+  filter(commonname == "Atlantic cod") |>
+  group_by(stockid) |>
+  unique()
 
 ```
 
@@ -546,3 +549,22 @@ atl_cod_ts_plus_extra |>
 ### Q9 (2 points)
 
 What happened to Atlantic cod stocks for each region following each piece of legislation or management plan, and why do you think this was so? Your multi-paragraph answer should be informed by content from the book chapter and your figure from Q8; additional sources are optional, and all sources should be cited.
+
+
+
+
+In the late 1960s, the Canadian Cod industry reached its global peak production of roughly 5 million metric tons of fish that year. However, in the 7 following years production would decrease by nearly a factor of 5 ( Figure from Q8 ). In 1976, the Magnuson-Stevens Fishery Conservation and Management Act (MSFCMA) was passed in the US in an attempt to protect the cod stocks from further depletion. Importantly, the act "protected U.S. waters from foreign fishing vessels", but presumably did not restrict access to US-based fishermen (https://pressbooks.pub/extinctionstories/chapter/atlantic-cod/). As a result, Post-MSFCMA US cod production actually increased significantly while Canada's dropped further. Then, Canadian production seemed to increase by almost 30%, which was most likely because the cod populations had time to respawn in the American stocks that were only exploited about 1/10th as much as those in Canada ( Figure from Q8 ); this level of production was sustained until it once again crashed sharply over the course of 5 years in the mid - late 1980s.
+
+The passage of the 1996 Sustainable Fisheries Act restricted access to habitats and established stricter catch quotas for US-based fishermen (https://pressbooks.pub/extinctionstories/chapter/atlantic-cod/). This produced the opposite effect that the 1976 legislation did: American production in the short term fell because of the restrictions, whereas Canadian production increased slightly since they did not fall under the legislation's jurisdiction. And similarly, after the short term decline was over and the fish had a chance to restock, American production increased, however in Canada production declined at the same time ( around the late 1990s )( Figure from Q8). 
+
+Interestingly, the passage of the Magnuson-Stevens Fishery Conservation and Management Reauthorization Act, which was intended to further decrease access to cod habitats as outlined in the sustainable fisheries act, saw increases in both the American and Canadian cod production (https://pressbooks.pub/extinctionstories/chapter/atlantic-cod/)( Figure from Q8 ). My best guess is that because this is the "reauthorization" of the MSFCMA, it once again aimed to limit foreign access to cod in US waters rather than both American and foreign fishermen, thereby allowing the American industry to enlarge. And although Canada would presumably be the foreign nation most impacted by the change in legislation in america, 2006 was the year following a local minimum yearly production, meaning fish would have restocked enough to allow for a larger fishing year in Canadian waters, meaning the extra legislation really did not protect the cod stocks enough for a resurgence ( Figure from Q8 ).
+
+
+
+
+
+
+
+
+
+

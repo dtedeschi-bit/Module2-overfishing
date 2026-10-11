@@ -1,7 +1,6 @@
 # Module 2: Overfishing
 
-## Team members and contributions
-To be updated
+contributors: Dante 
 
 ## Learning objectives
 
