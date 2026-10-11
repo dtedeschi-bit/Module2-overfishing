@@ -335,12 +335,15 @@ atl_cod_ts_data = ts_params_metrics |>
   semi_join(stockid_vector, join_by(stockid))
 
 
-most_common_ts_stuff = atl_cod_ts_data |> 
-  group_by(tscategory) |> 
-  mutate(ts_category_most_common = n()) |> 
-  select(tscategory, ts_category_most_common) |>
-  unique()
+#most_common_ts_stuff = atl_cod_ts_data |> 
+ # group_by(tsid) |> 
+ # mutate(ts_category_most_common = n()) |> 
+  #select(tsid, ts_category_most_common, tscategory) |>
+ # unique()
 
+
+
+#atl_cod_ts_for_real |> filter(tsshort =="F") |> view()
 
 
 ```
@@ -355,13 +358,66 @@ Fishing mortality refers to the rate at which fish are removed from a stock by f
 
 Catch refers to the total mass of fish caught on a given trip; landings refers to the percent of the total catch that is brought back with the boat to land. 
 
+In reference to the following question, the most common submetric of Catch or Landings is CdvimeanC-ratio, which compares a given catch of fish to the mean, thereby indicating how many times larger or smaller this individual catch is compared to the long term average. F-1/y is the most common metric to represent Fishing Mortality, and is measured by a value zero or greater that indicates the percentage of a given stock's population removed by fishing in a given year. This percentage is calculated using the formula P = 1 - e^-F, where F is the fishing mortality value. As such, as F increases linearly, the percentage of fish removed approaches 100%. 
+
 
 ### Q6 (1 point)
 
 Make a timeseries figure for each stock of Atlantic cod in a single figure. Rather than coloring by the identity of the stock, color by the region it comes from (this may require joining). Use `facet_*()` to plot the top two metrics from Q5 in a single code chunk. Connect the points for each stock and focus on the period since 1950. Update until the figure is easily interpretable.
 
 
+```{r}
+
+atl_cod_stock_fusion = atl_cod_stock |>
+  select(stockid, region)
+
+
+atl_cod_ts_for_real = atl_cod_ts_data |>
+  left_join(atl_cod_stock_fusion, join_by(stockid))
+
+# getting fishing mortality into a more easily read format
+
+atl_cod_ts_for_real$tsvalue = if_else(atl_cod_ts_for_real$tsid == "F-1/yr", 
+                                      true = -expm1(-atl_cod_ts_for_real$tsvalue), 
+                                      false = atl_cod_ts_for_real$tsvalue)
+
+
+#atl_cod_ts_for_real |> filter(assessid == "AFWG-CODNEAR-1943-2021-ICESIMP2024", tsid == "F-1/yr") |> view()
+#atl_cod_ts_for_real |> filter(tsid == "F-1/yr") |> arrange(desc(tsvalue)) |> view()
+
+
+
+atl_cod_ts_for_real |> 
+  filter(as.numeric(tsyear) > 1950, 
+         !is.na(tsvalue) == TRUE,
+         tscategory == "FISHING MORTALITY" |
+           tscategory == "CATCH or LANDINGS",
+         tsid == "F-1/yr"| 
+           tsid == "CdivMEANC-ratio")|>
+  ggplot(aes(x = tsyear, 
+             y = tsvalue, 
+             color = region,
+             group = stockid)) +
+  geom_line()+
+  theme_classic()+
+  facet_wrap(~tscategory+region, 
+             scales = "free_y")+
+  labs(color = "Location of Stock")
+
+
+
+
+```
+
 -   What happened to Atlantic cod stocks during the period 1950-present? What information does each metric convey?
+
+
+For Catch or Landings plots, for most stocks in all regions the highest CoL occured in the 1990s up to 2000, when there was a brief pause, and for some stocks more recently the CoL has shot up sharply and subsequently fallen back down slightly. At times when CoL is high, this means the number of fish being caught is greater than the average number of fish caught by the factor listed on the y-axis; this can be interpreted as a measure of expansion of the industry or higher fishing activity during a given time.
+
+For Fishing mortality, percentages started much lower in the 1950s and 60s, and more recently, though there is some fluctuation, the percentages are much higher than they were.
+This is a measure of the percent ( multiply y-axis by 10 ) of the fish population removed from a given stock in a given year. So although Catch or Landings was much higher 70 years ago, the high recent fishing mortality indicates modern fish populations are being stretched thinner now compared to previously.
+
+
 
 ### Q7 (1 point)
 
